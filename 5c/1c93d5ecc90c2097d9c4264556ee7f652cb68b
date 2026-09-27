@@ -1,0 +1,27 @@
+package-lock.json
+  s_559e2426083957::t_7b001770dfca0b 19,2091-2100,4320-4326
+package.json
+  s_559e2426083957::t_3bcc12a71ee51f 27
+tsconfig.json
+  s_559e2426083957::t_64464ffd02c30c 7
+worker-configuration.d.ts
+  s_559e2426083957::t_98c96ac7ad3481 2,7
+wrangler.jsonc
+  s_559e2426083957::t_3b9b9ffe44fe7a 29-32
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "5c1c93d5ecc90c2097d9c4264556ee7f652cb68b",
+  "prompts": {},
+  "sessions": {
+    "s_559e2426083957": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_f3bea8751ffeRLbRaoL1httWe5",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Joao Leitao <jleitao@cloudflare.com>"
+    }
+  }
+}
