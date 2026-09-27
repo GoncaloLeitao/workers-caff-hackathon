@@ -150,7 +150,7 @@ if (flags.has("--agent")) {
     const { res, body } = await api(`/agents/caff-agent/${session}`, {
       method: "POST",
       headers: { "x-caff-client": "smoke" },
-      body: JSON.stringify({ message: "How many different things are on the menu? One short sentence." })
+      body: JSON.stringify({ message: "How much is a bacon butty? One short sentence." })
     });
     if (res.ok && body?.reply) {
       ok(`reply in ${body.ms} ms using ${body.model}: "${body.reply.replace(/\s+/g, " ").slice(0, 120)}"`);
