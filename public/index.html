@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en-GB">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>The Workers Caff · Dashboard</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/styles.css" />
+    <link rel="stylesheet" href="/dashboard.css" />
+  </head>
+  <body>
+    <div class="awning" aria-hidden="true"></div>
+
+    <header class="topbar">
+      <a class="sign" href="/">
+        <img src="/favicon.svg" alt="" />
+        <div>
+          <span class="sign-name">The Workers Caff</span>
+          <div class="sign-sub">A REST API, an MCP server and an AI agent on one Cloudflare Worker</div>
+        </div>
+      </a>
+      <div class="topbar-right">
+        <span class="pill" id="status"><span class="dot"></span><span id="status-text">Open</span></span>
+        <span class="pill mono" id="clock">--:--</span>
+        <a class="btn orange" href="/chat">Chat to Sid, your agent →</a>
+      </div>
+    </header>
+
+    <section class="connect card">
+      <div class="connect-row">
+        <div class="connect-label">
+          <strong>Your MCP server</strong>
+          <span class="muted">Point any MCP client here</span>
+        </div>
+        <div class="copybox">
+          <code id="mcp-url">…/mcp</code>
+          <button class="btn small" data-copy="#mcp-url">Copy</button>
+        </div>
+        <div class="connect-links">
+          <a class="btn ghost small" href="https://playground.ai.cloudflare.com/" target="_blank" rel="noopener">AI Playground ↗</a>
+          <button class="btn ghost small" data-copy-text="npx @modelcontextprotocol/inspector">Copy MCP Inspector command</button>
+          <a class="btn ghost small" href="/api/state" target="_blank">API ↗</a>
+        </div>
+      </div>
+    </section>
+
+    <div id="approvals"></div>
+
+    <main class="grid">
+      <div class="col">
+      <section class="card orders">
+        <div class="card-head">
+          <h2 class="card-title">Orders</h2>
+          <div class="card-meta" id="orders-meta"></div>
+        </div>
+        <div class="board" id="board">
+          <div class="empty">Loading the caff…</div>
+        </div>
+      </section>
+
+      <section class="card stock">
+        <div class="card-head">
+          <h2 class="card-title">Stock</h2>
+          <div class="card-meta" id="stock-meta"></div>
+        </div>
+        <div class="card-body">
+          <div class="stock-grid" id="stock"></div>
+        </div>
+      </section>
+      </div>
+
+      <div class="col">
+      <aside class="card missions">
+        <div class="card-head">
+          <h2 class="card-title">Mission board</h2>
+          <div class="card-meta" id="missions-meta"></div>
+        </div>
+        <div class="card-body">
+          <div class="progress" id="progress"></div>
+          <ol class="mission-list" id="missions"></ol>
+        </div>
+      </aside>
+
+      <aside class="card activity">
+        <div class="card-head">
+          <h2 class="card-title">Activity</h2>
+          <div class="card-meta">Live</div>
+        </div>
+        <ul class="feed" id="feed"></ul>
+      </aside>
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="stats" id="stats"></div>
+      <div class="footer-actions">
+        <button class="btn ghost" id="rush" title="Simulate walk-in customers placing orders">Rush hour</button>
+        <button class="btn ghost" id="reset" title="Fresh stock and no orders. The mission board is kept.">Reset caff</button>
+      </div>
+    </footer>
+
+    <div class="toasts" id="toasts" aria-live="polite"></div>
+
+    <script src="/dashboard.js" type="module"></script>
+  </body>
+</html>

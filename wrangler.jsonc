@@ -26,9 +26,10 @@
   },
 
   "vars": {
-    // Any Workers AI model with function calling works. This one is on the free plan.
-    // Try "@cf/openai/gpt-oss-120b" for stronger reasoning (uses more of the free allowance).
-    "MODEL": "@cf/zai-org/glm-4.7-flash"
+    // Any Workers AI model with function calling works. This one is fast, reliable
+    // with tools and available on the free plan (about 100 agent replies a day).
+    // Running low? "@cf/zai-org/glm-4.7-flash" costs about a third as much but is slower.
+    "MODEL": "@cf/openai/gpt-oss-120b"
   },
 
   // CaffStore: the caff's database (menu, orders, stock, mission board).

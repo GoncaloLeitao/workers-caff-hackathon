@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en-GB">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Chat to Sid · The Workers Caff</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/styles.css" />
+    <link rel="stylesheet" href="/chat.css" />
+  </head>
+  <body>
+    <div class="awning" aria-hidden="true"></div>
+
+    <header class="topbar">
+      <a class="sign" href="/">
+        <img src="/favicon.svg" alt="" />
+        <div>
+          <span class="sign-name">The Workers Caff</span>
+          <div class="sign-sub">Chat to Sid, the agent that runs the caff</div>
+        </div>
+      </a>
+      <div class="topbar-right">
+        <span class="pill" id="mcp-pill"><span class="dot off"></span><span id="mcp-pill-text">Not connected to MCP yet</span></span>
+        <button class="btn ghost" id="new-chat">New conversation</button>
+        <a class="btn" href="/" target="caff-dashboard">Dashboard ↗</a>
+      </div>
+    </header>
+
+    <main class="chat-layout">
+      <section class="card chat">
+        <div class="thread" id="thread">
+          <div class="hello" id="hello">
+            <img src="/favicon.svg" alt="" />
+            <h1>Alright? I'm Sid.</h1>
+            <p>I run The Workers Caff. Once you've connected me to your MCP server (Checkpoint 3) I can take orders, chase the kitchen and restock. Until then I'm all talk.</p>
+          </div>
+        </div>
+        <div class="suggestions" id="suggestions"></div>
+        <form class="composer" id="composer">
+          <textarea id="input" rows="1" placeholder="Table 4 wants two builder's teas and a bacon butty…" autocomplete="off"></textarea>
+          <button class="btn orange" id="send" type="submit">Send</button>
+        </form>
+      </section>
+
+      <aside class="side">
+        <section class="card">
+          <div class="card-head">
+            <h2 class="card-title">Sid's tools</h2>
+            <span class="card-meta" id="tool-count">0</span>
+          </div>
+          <div class="card-body" id="servers">
+            <p class="muted small">No MCP servers yet. Uncomment TODO 1 and TODO 2 in <code>src/agent.ts</code>, then send a message.</p>
+          </div>
+        </section>
+        <section class="card">
+          <div class="card-head">
+            <h2 class="card-title">Under the hood</h2>
+          </div>
+          <div class="card-body small">
+            <dl class="facts">
+              <dt>Model</dt>
+              <dd id="model" class="mono">…</dd>
+              <dt>Session</dt>
+              <dd id="session" class="mono">…</dd>
+              <dt>Last reply</dt>
+              <dd id="last-turn">–</dd>
+              <dt>This chat</dt>
+              <dd id="total-tokens">–</dd>
+            </dl>
+            <p class="muted">Each message runs in a Durable Object: your agent. It connects to <code>/mcp</code> like any other MCP client, then lets the model call your tools.</p>
+          </div>
+        </section>
+      </aside>
+    </main>
+
+    <script src="/chat.js" type="module"></script>
+  </body>
+</html>

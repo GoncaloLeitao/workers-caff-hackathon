@@ -1,0 +1,377 @@
+/* The Workers Caff: shared styles for the dashboard and the chat UI. */
+
+:root {
+  --orange: #f6821f;
+  --orange-deep: #d9650b;
+  --orange-soft: #fde6d1;
+  --brown: #2b1b12;
+  --brown-2: #5a4336;
+  --brown-3: #8a7465;
+  --paper: #f7f1e7;
+  --paper-2: #efe6d8;
+  --card: #fffcf7;
+  --line: #e6dccd;
+  --green: #2e9e5b;
+  --amber: #e2a53a;
+  --red: #c4432f;
+  --blue: #1f6fb2;
+  --purple: #7d4bb3;
+  --olive: #758a2a;
+  --radius: 14px;
+  --shadow: 0 1px 0 rgba(43, 27, 18, 0.06), 0 8px 24px -12px rgba(43, 27, 18, 0.25);
+  --mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
+  --sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--brown);
+  font-family: var(--sans);
+  font-size: 15px;
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  background-image: radial-gradient(rgba(43, 27, 18, 0.07) 1px, transparent 1px);
+  background-size: 22px 22px;
+  min-height: 100vh;
+}
+
+a {
+  color: var(--orange-deep);
+}
+
+button {
+  font: inherit;
+  cursor: pointer;
+}
+
+code,
+.mono {
+  font-family: var(--mono);
+  font-size: 0.92em;
+}
+
+/* ---- Awning + sign ------------------------------------------------------- */
+
+.awning {
+  height: 26px;
+  background: repeating-linear-gradient(90deg, var(--orange) 0 44px, #fff4e6 44px 88px);
+  position: relative;
+  box-shadow: 0 4px 0 rgba(43, 27, 18, 0.08);
+}
+
+.awning::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -12px;
+  height: 12px;
+  background: radial-gradient(circle at 22px 0, var(--orange) 21px, transparent 22px) 0 0 / 88px 12px repeat-x,
+    radial-gradient(circle at 66px 0, #fff4e6 21px, transparent 22px) 0 0 / 88px 12px repeat-x;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 26px 28px 8px;
+  flex-wrap: wrap;
+}
+
+.sign {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  text-decoration: none;
+  color: inherit;
+}
+
+.sign img {
+  width: 52px;
+  height: 52px;
+}
+
+.sign-name {
+  display: inline-block;
+  background: var(--brown);
+  color: #fff4e6;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-size: 22px;
+  padding: 6px 14px 5px;
+  border-radius: 6px;
+  box-shadow: inset 0 0 0 2px var(--brown), inset 0 0 0 4px #fff4e6;
+}
+
+.sign-sub {
+  margin-top: 6px;
+  color: var(--brown-2);
+  font-size: 13px;
+}
+
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 0 0 rgba(46, 158, 91, 0.6);
+  animation: pulse 2s infinite;
+}
+
+.dot.off {
+  background: var(--red);
+  animation: none;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(46, 158, 91, 0.55);
+  }
+  70% {
+    box-shadow: 0 0 0 9px rgba(46, 158, 91, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(46, 158, 91, 0);
+  }
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--brown);
+  background: var(--brown);
+  color: #fff4e6;
+  padding: 8px 14px;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 14px;
+  text-decoration: none;
+  transition: transform 0.08s ease, background 0.15s ease;
+}
+
+.btn:hover {
+  background: #45301f;
+}
+
+.btn:active {
+  transform: translateY(1px);
+}
+
+.btn.orange {
+  background: var(--orange);
+  border-color: var(--orange-deep);
+  color: #fff;
+}
+
+.btn.orange:hover {
+  background: var(--orange-deep);
+}
+
+.btn.ghost {
+  background: transparent;
+  color: var(--brown);
+  border-color: var(--line);
+}
+
+.btn.ghost:hover {
+  background: var(--paper-2);
+}
+
+.btn.small {
+  padding: 4px 10px;
+  font-size: 12.5px;
+  border-radius: 8px;
+}
+
+/* ---- Cards ------------------------------------------------------------------ */
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.card-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 18px 10px;
+  border-bottom: 1px dashed var(--line);
+}
+
+.card-title {
+  margin: 0;
+  font-size: 12px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--brown-2);
+  font-weight: 800;
+}
+
+.card-meta {
+  font-size: 12.5px;
+  color: var(--brown-3);
+}
+
+.card-body {
+  padding: 14px 18px 18px;
+}
+
+/* ---- Source badges ------------------------------------------------------------ */
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 1px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  border: 1px solid currentColor;
+  background: color-mix(in srgb, currentColor 10%, transparent);
+}
+
+.src-mcp {
+  color: var(--blue);
+}
+.src-agent {
+  color: var(--orange-deep);
+}
+.src-visitor {
+  color: var(--purple);
+}
+.src-dashboard {
+  color: var(--brown-2);
+}
+.src-walk-in {
+  color: var(--olive);
+}
+.src-api {
+  color: #4b5563;
+}
+.src-smoke {
+  color: #9ca3af;
+}
+
+/* ---- Toasts -------------------------------------------------------------------- */
+
+.toasts {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 50;
+}
+
+.toast {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--brown);
+  color: #fff4e6;
+  border-radius: 12px;
+  padding: 12px 16px;
+  box-shadow: 0 12px 30px -10px rgba(0, 0, 0, 0.45);
+  font-weight: 600;
+  animation: toast-in 0.45s cubic-bezier(0.2, 1.4, 0.4, 1) both;
+  max-width: 380px;
+}
+
+.toast .star {
+  flex: none;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--orange);
+  display: grid;
+  place-items: center;
+  font-weight: 900;
+  color: #fff;
+}
+
+.toast small {
+  display: block;
+  font-weight: 500;
+  opacity: 0.8;
+}
+
+.toast.leaving {
+  animation: toast-out 0.3s ease both;
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes toast-out {
+  to {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+}
+
+.empty {
+  color: var(--brown-3);
+  font-size: 13.5px;
+  text-align: center;
+  padding: 18px 8px;
+}
+
+.muted {
+  color: var(--brown-3);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}

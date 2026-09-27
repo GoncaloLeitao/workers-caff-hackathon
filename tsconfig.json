@@ -4,7 +4,7 @@
     "lib": ["ES2023"],
     "module": "ES2022",
     "moduleResolution": "bundler",
-    "types": ["./worker-configuration.d.ts"],
+    "types": ["./worker-configuration.d.ts", "node"],
     "noEmit": true,
     "isolatedModules": true,
     "verbatimModuleSyntax": true,

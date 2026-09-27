@@ -1,6 +1,7 @@
+import { AsyncLocalStorage } from "node:async_hooks";
 import { env } from "cloudflare:workers";
 import type { Agent } from "agents";
-import type { ModelMessage, StepResult, ToolSet } from "ai";
+import { wrapLanguageModel, type ModelMessage, type StepResult, type ToolSet } from "ai";
 import { createWorkersAI } from "workers-ai-provider";
 
 /**
@@ -40,7 +41,7 @@ export type ChatAgent = Agent<Env, ChatState> & {
   chat(message: string, origin: string): Promise<ChatReply>;
 };
 
-const DEFAULT_MODEL = "@cf/zai-org/glm-4.7-flash";
+const DEFAULT_MODEL = "@cf/openai/gpt-oss-120b";
 
 function modelName(bindings: Env = env): string {
   return (bindings.MODEL as string | undefined) || DEFAULT_MODEL;
@@ -52,16 +53,77 @@ const HISTORY_TO_KEEP = 40;
 // Model
 // -----------------------------------------------------------------------------
 
+const NO_TOOLS_NOTE =
+  "Right now you have NO tools and cannot call any functions, so you cannot see or change the menu, orders or stock. " +
+  "Never write out a function or tool call. Do not pretend to have done anything. Reply in plain text: explain that " +
+  "you're not connected to the caff's systems yet (your developer needs to connect the MCP server in src/agent.ts), " +
+  "then help with anything else.";
+
+const NOT_CONNECTED_REPLY =
+  "I'm not connected to the caff's systems yet, so I can't see the menu, orders or stock. " +
+  "Connect me to your MCP server in src/agent.ts (Checkpoint 3) and I'll get stuck in.";
+
+/**
+ * Some open models occasionally leak their raw tool-call syntax as text
+ * (for example gpt-oss's "<|channel|>" tokens). Strip it so the chat stays readable.
+ */
+export function cleanReply(text: string, hadTools: boolean): string {
+  const leaked = /<\|(start|channel|message|call|end|constrain)\|>/.test(text);
+  const cleaned = text
+    .replace(/<\|start\|>[\s\S]*?(<\|call\|>|<\|end\|>|$)/g, "")
+    .replace(/<\|[a-z_]+\|>/g, "")
+    .trim();
+  if (cleaned) return cleaned;
+  if (!hadTools) return NOT_CONNECTED_REPLY;
+  return leaked ? "Sorry, I got my wires crossed there. Could you ask me that again?" : "";
+}
+
+/** Token usage for the current chat turn, so the chat UI can show what each reply cost. */
+interface TurnUsage {
+  modelCalls: number;
+  inputTokens: number;
+  outputTokens: number;
+}
+const turnUsage = new AsyncLocalStorage<TurnUsage>();
+
 /** The Workers AI model named in wrangler.jsonc (vars.MODEL), tuned for snappy tool calling. */
 export function chatModel(bindings: Env = env) {
   const workersai = createWorkersAI({ binding: bindings.AI });
   const model = modelName(bindings);
-  // Reasoning models think before they answer. For a chatty caff manager
-  // we want quick replies, so turn thinking off (or down) where we can.
+  // Reasoning models think before they answer. For a chatty caff manager we
+  // want quick replies, so keep the thinking short.
   const settings: Record<string, unknown> = {};
-  if (model.includes("glm-4.7-flash")) settings.chat_template_kwargs = { enable_thinking: false };
-  else if (model.includes("gpt-oss")) settings.reasoning_effort = "low";
-  return workersai(model as Parameters<typeof workersai>[0], settings as Parameters<typeof workersai>[1]);
+  if (model.includes("gpt-oss") || model.includes("glm")) settings.reasoning_effort = "low";
+  return wrapLanguageModel({
+    model: workersai(model as Parameters<typeof workersai>[0], settings as Parameters<typeof workersai>[1]),
+    middleware: {
+      transformParams: async ({ params }) => {
+        // Before Checkpoint 3 the agent has no tools. Tell the model, so it
+        // doesn't pretend to take orders (or try to call tools it hasn't got).
+        const prompt = params.tools?.length
+          ? params.prompt
+          : [{ role: "system" as const, content: NO_TOOLS_NOTE }, ...params.prompt];
+        // Some models default to very short replies (256 tokens). Give them room.
+        return { ...params, prompt, maxOutputTokens: params.maxOutputTokens ?? 2048 };
+      },
+      wrapGenerate: async ({ doGenerate }) => {
+        const result = await doGenerate();
+        const tally = turnUsage.getStore();
+        if (tally) {
+          tally.modelCalls += 1;
+          tally.inputTokens += tokenCount(result.usage?.inputTokens);
+          tally.outputTokens += tokenCount(result.usage?.outputTokens);
+        }
+        return result;
+      }
+    }
+  });
+}
+
+function tokenCount(value: unknown): number {
+  if (typeof value === "number") return value;
+  const total = (value as { total?: unknown } | undefined)?.total;
+  return typeof total === "number" ? total : 0;
 }
 
 // -----------------------------------------------------------------------------
@@ -159,6 +221,7 @@ export async function handleChatRequest(agent: ChatAgent, request: Request): Pro
   const model = modelName();
 
   if (request.method === "GET") {
+    await agent.mcp.waitForConnections({ timeout: 3_000 });
     return json({ messages: agent.state?.messages ?? [], model, mcp: mcpStatus(agent) });
   }
   if (request.method === "DELETE") {
@@ -177,12 +240,21 @@ export async function handleChatRequest(agent: ChatAgent, request: Request): Pro
   if (!message) return json({ error: 'Send JSON like { "message": "What\'s on the menu?" }' }, 400);
 
   const started = Date.now();
+  const usage: TurnUsage = { modelCalls: 0, inputTokens: 0, outputTokens: 0 };
   try {
     // After a restart, saved MCP connections reconnect in the background.
     await agent.mcp.waitForConnections({ timeout: 5_000 });
-    const { reply, tools } = await agent.chat(message, url.origin);
+    const { reply: text, tools } = await turnUsage.run(usage, () => agent.chat(message, url.origin));
+    const reply =
+      cleanReply(text, mcpStatus(agent).toolCount > 0) || "(Sid went quiet. The model returned no text, so try asking again.)";
+    // Keep the saved conversation in step with what the user actually saw.
+    const saved = agent.state?.messages ?? [];
+    const last = saved[saved.length - 1];
+    if (last?.role === "assistant" && last.content !== reply) {
+      agent.setState({ ...agent.state, messages: [...saved.slice(0, -1), { ...last, content: reply }] });
+    }
     if (request.headers.get("x-caff-client") !== "smoke") await reportTurn(agent, url.origin, tools);
-    return json({ reply, tools, ms: Date.now() - started, model, mcp: mcpStatus(agent) });
+    return json({ reply, tools, usage, ms: Date.now() - started, model, mcp: mcpStatus(agent) });
   } catch (e) {
     console.error("chat failed", e);
     return json({ error: friendlyError(e, url.origin), ms: Date.now() - started, model, mcp: mcpStatus(agent) }, 500);
@@ -226,10 +298,10 @@ export function mcpStatus(agent: ChatAgent) {
 function friendlyError(e: unknown, origin: string): string {
   const text = e instanceof Error ? e.message : String(e);
   if (/4006|daily free allocation|neurons/i.test(text)) {
-    return "You've used today's free Workers AI allowance (10,000 Neurons). Try a cheaper model in wrangler.jsonc (vars.MODEL) or upgrade to Workers Paid.";
+    return 'You\'ve used today\'s free Workers AI allowance (10,000 Neurons). Switch vars.MODEL in wrangler.jsonc to "@cf/zai-org/glm-4.7-flash" (about a third of the cost) or upgrade to Workers Paid.';
   }
   if (/5035|requires a Workers Paid plan/i.test(text)) {
-    return 'That model needs the Workers Paid plan. Set vars.MODEL in wrangler.jsonc to "@cf/zai-org/glm-4.7-flash".';
+    return 'That model needs the Workers Paid plan. Set vars.MODEL in wrangler.jsonc back to "@cf/openai/gpt-oss-120b".';
   }
   if (/3040|capacity|429/i.test(text)) {
     return "Workers AI is busy right now. Give it a few seconds and try again.";
