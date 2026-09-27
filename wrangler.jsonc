@@ -1,0 +1,47 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "workers-caff",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-09-20",
+  "compatibility_flags": [
+    // The Agents SDK needs Node.js APIs.
+    "nodejs_compat",
+    // Lets your agent call your own /mcp endpoint (and other tables' Workers)
+    // over the public internet, the same way Claude or AI Playground would.
+    "global_fetch_strictly_public"
+  ],
+
+  // The dashboard and chat UI in ./public. Requests to the paths below run
+  // the Worker first; everything else is served straight from static assets.
+  "assets": {
+    "directory": "./public",
+    "binding": "ASSETS",
+    "run_worker_first": ["/api/*", "/mcp", "/agents/*"]
+  },
+
+  // Workers AI: the model your agent thinks with.
+  "ai": {
+    "binding": "AI",
+    "remote": true
+  },
+
+  "vars": {
+    // Any Workers AI model with function calling works. This one is on the free plan.
+    // Try "@cf/openai/gpt-oss-120b" for stronger reasoning (uses more of the free allowance).
+    "MODEL": "@cf/zai-org/glm-4.7-flash"
+  },
+
+  // CaffStore: the caff's database (menu, orders, stock, mission board).
+  // CaffAgent: one agent instance per chat session.
+  "durable_objects": {
+    "bindings": [
+      { "name": "CAFF", "class_name": "CaffStore" },
+      { "name": "CaffAgent", "class_name": "CaffAgent" }
+    ]
+  },
+  "migrations": [
+    { "tag": "v1", "new_sqlite_classes": ["CaffStore", "CaffAgent"] }
+  ],
+
+  "observability": { "enabled": true }
+}
