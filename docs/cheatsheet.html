@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<title>The Workers Caff: cheat sheet</title>
+<style>
+  /* ============================================================
+     Cloudflare Workers Design System — print/PDF stylesheet
+     Keep this <style> block unchanged; edit only the <body>.
+     ============================================================ */
+  :root{
+    --cf-orange:#ff4801;
+    --cf-orange-hover:#ff7038;
+    --cf-orange-light:rgba(255,72,1,0.08);
+    --cf-text:#521000;
+    --cf-text-muted:rgba(82,16,0,0.70);
+    --cf-text-subtle:rgba(82,16,0,0.40);
+    --cf-bg:#fffbf5;
+    --cf-bg-card:#fffdfb;
+    --cf-bg-hover:#fef7ed;
+    --cf-border:#ebd5c1;
+    --cf-border-light:rgba(235,213,193,0.5);
+    --won:#0f7a52;  --won-bg:rgba(16,185,129,0.12);
+    --lost:#b42318; --lost-bg:rgba(180,35,24,0.10);
+    --open:#ff4801; --open-bg:rgba(255,72,1,0.08);
+  }
+
+  /* margin:0 keeps the cream full-bleed (no white border). Wrap content in .page
+     containers so EVERY page has identical top/bottom spacing (body padding would
+     only pad the first/last page, leaving interior pages flush at the top). */
+  @page{ size:A4; margin:0; }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html,body{ background:var(--cf-bg); -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+    color:var(--cf-text-muted);
+    line-height:1.55;font-size:10.5px;-webkit-font-smoothing:antialiased;
+  }
+  .page{ width:210mm; height:296mm; padding:15mm 15mm 13mm; break-after:page; display:flex; flex-direction:column; }
+  .page:last-child{ break-after:auto; }
+  .page > *{ flex-shrink:0; }
+  strong,b{color:var(--cf-text);font-weight:600;}
+  a{color:var(--cf-orange);text-decoration:none;}
+
+  .dashed{height:1px;background:var(--cf-border);}
+
+  /* Cover */
+  .cover{
+    position:relative;background:var(--cf-bg);border:1px solid var(--cf-border);
+    border-radius:14px;padding:26px 28px 24px;margin-bottom:26px;break-inside:avoid;
+  }
+  .cover-top{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:18px;}
+  /* customer/brand logo: mix-blend multiply drops a white logo background into the cream (no white box) */
+  .cust-logo{height:38px;width:auto;mix-blend-mode:multiply;}
+  .brand{display:flex;align-items:center;gap:10px;}
+  .brand svg{height:24px;color:var(--cf-orange);}
+  .brand .bt{font-size:13px;font-weight:500;letter-spacing:-.02em;color:var(--cf-text);}
+  .brand .bt span{color:var(--cf-text-muted);font-weight:400;}
+  .cover h1{font-size:31px;font-weight:500;letter-spacing:-.02em;color:var(--cf-text);margin-bottom:7px;line-height:1.1;}
+  .cover .sub{font-size:14px;color:var(--cf-text-muted);margin-bottom:18px;}
+  .chips{display:flex;flex-wrap:wrap;gap:7px;}
+  .chip{border:1px solid var(--cf-border);background:var(--cf-bg-hover);border-radius:9999px;padding:4px 12px;font-size:10px;font-weight:500;color:var(--cf-text);}
+
+  .lede{font-size:13px;color:var(--cf-text-muted);margin-bottom:22px;break-inside:avoid;}
+
+  /* Sections / headings */
+  .section{margin-bottom:20px;}
+  h2{position:relative;font-size:21px;font-weight:500;letter-spacing:-.02em;color:var(--cf-text);padding-top:22px;margin-bottom:13px;break-after:avoid;display:flex;align-items:center;gap:10px;}
+  h2::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:var(--cf-border);}
+  h2 .num{flex:none;width:24px;height:24px;border-radius:7px;background:var(--cf-orange);color:#fff;font-size:13px;font-weight:600;display:inline-flex;align-items:center;justify-content:center;}
+  h3{font-size:13px;font-weight:600;color:var(--cf-text);margin:15px 0 6px;break-after:avoid;letter-spacing:-.01em;}
+  p{margin-bottom:9px;color:var(--cf-text-muted);}
+  ul{margin:0 0 10px;padding-left:18px;} li{margin-bottom:5px;color:var(--cf-text-muted);break-inside:avoid;} li::marker{color:var(--cf-orange);}
+  code{background:var(--cf-orange-light);color:var(--cf-text);padding:1px 5px;border-radius:4px;font-size:9.5px;font-family:'SF Mono','Fira Code',Consolas,monospace;}
+
+  /* Tables */
+  table{width:100%;border-collapse:collapse;margin:6px 0 8px;font-size:9.7px;border:1px solid var(--cf-border);border-radius:8px;overflow:hidden;}
+  thead{display:table-header-group;}
+  th{text-align:left;padding:9px 11px;background:var(--cf-bg-hover);color:var(--cf-text);font-weight:600;font-size:9px;text-transform:uppercase;letter-spacing:.04em;border-bottom:1px solid var(--cf-border);}
+  th:not(:last-child){border-right:1px solid var(--cf-border-light);}
+  td{padding:8px 11px;border-bottom:1px solid var(--cf-border-light);color:var(--cf-text-muted);vertical-align:top;}
+  td:not(:last-child){border-right:1px solid var(--cf-border-light);}
+  tr:last-child td{border-bottom:none;} tr{break-inside:avoid;}
+  td.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap;}
+  td a{font-weight:500;}
+
+  .pill{display:inline-block;border-radius:9999px;padding:2px 9px;font-size:8.5px;font-weight:600;white-space:nowrap;}
+  .pill.won{background:var(--won-bg);color:var(--won);}
+  .pill.lost{background:var(--lost-bg);color:var(--lost);}
+  .pill.open{background:var(--open-bg);color:var(--open);}
+
+  /* Cards */
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:4px;}
+  .card{background:var(--cf-bg);border:1px solid var(--cf-border);border-radius:10px;padding:14px 15px;break-inside:avoid;}
+  .card .tag{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--cf-orange);margin-bottom:9px;padding-bottom:7px;border-bottom:1px solid var(--cf-border);}
+  .card.full{grid-column:1 / -1;}
+  .person{margin-bottom:6px;font-size:10px;} .person:last-child{margin-bottom:0;}
+  .person .nm{font-weight:600;color:var(--cf-text);} .person .rl{color:var(--cf-text-muted);}
+
+  /* Callout / quote with corner brackets */
+  .quote{border-left:3px solid var(--cf-orange);background:var(--cf-orange-light);border-radius:0 8px 8px 0;padding:14px 18px;margin-top:6px;break-inside:avoid;}
+  .quote .tag{font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--cf-orange);margin-bottom:4px;}
+  .quote p{margin:0;color:var(--cf-text);}
+
+  /* Footer */
+  .foot{margin-top:auto;padding-top:10px;position:relative;font-size:9px;color:var(--cf-text-subtle);display:flex;justify-content:space-between;}
+  .foot::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:var(--cf-border);}
+  .avoid{break-inside:avoid;}
+</style>
+<style>
+  /* Cheat-sheet additions, built from the same tokens. */
+  body{font-size:11px;}
+  .cover{padding:18px 24px 18px;margin-bottom:14px;}
+  .cover-top{margin-bottom:12px;}
+  .cover h1{font-size:32px;margin-bottom:5px;}
+  .cover .sub{margin-bottom:0;}
+  .section{margin-bottom:12px;}
+  h2{font-size:18px;padding-top:12px;margin-bottom:8px;}
+  table{margin:0 0 6px;font-size:10.2px;}
+  td{padding:5px 10px;}
+  pre{background:var(--cf-orange-light);color:var(--cf-text);border-radius:8px;padding:11px 14px;font-family:'SF Mono','Fira Code',Consolas,monospace;font-size:9.3px;line-height:1.45;white-space:pre;break-inside:avoid;margin:0 0 8px;}
+  pre .c{color:rgba(82,16,0,0.55);}
+  pre .k{color:var(--cf-orange);}
+  .links{display:grid;grid-template-columns:1fr 120px;gap:12px;align-items:stretch;}
+  .links table{margin:0;font-size:10.2px;}
+  .links td:first-child{white-space:nowrap;color:var(--cf-text);font-weight:500;width:96px;}
+  .qr{border:1px solid var(--cf-border);border-radius:10px;padding:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;text-align:center;}
+  .qr svg{width:90px;height:90px;display:block;}
+  .qr span{font-size:9px;color:var(--cf-text-muted);line-height:1.3;}
+  .cp{display:grid;grid-template-columns:1fr 1fr;gap:10px;break-inside:avoid;}
+  .cp .card{padding:12px 14px 10px;display:flex;flex-direction:column;}
+  .cp .head{display:flex;align-items:baseline;gap:9px;margin-bottom:7px;padding-bottom:7px;border-bottom:1px solid var(--cf-border);}
+  .cp .n{flex:none;width:22px;height:22px;border-radius:7px;background:var(--cf-orange);color:#fff;font-size:12px;font-weight:600;display:inline-flex;align-items:center;justify-content:center;align-self:center;}
+  .cp .t{font-size:14px;font-weight:500;letter-spacing:-.02em;color:var(--cf-text);}
+  .cp .by{margin-left:auto;font-size:9.5px;font-weight:600;color:var(--cf-orange);text-transform:uppercase;letter-spacing:.05em;white-space:nowrap;}
+  .cp ol{margin:0 0 7px;padding-left:17px;}
+  .cp li{margin-bottom:3px;}
+  .cp li::marker{color:var(--cf-orange);font-weight:600;}
+  .cp .m{margin-top:auto;font-size:9.5px;color:var(--cf-text-muted);border-top:1px solid var(--cf-border-light);padding-top:6px;display:flex;justify-content:space-between;gap:8px;}
+  .cp .m b{font-weight:600;color:var(--cf-text);}
+  .two{display:grid;grid-template-columns:1.3fr 1fr;gap:12px;align-items:start;}
+  .note{font-size:10.5px;margin:0;}
+  td code, p code, li code{font-size:9.6px;}
+</style>
+</head>
+<body>
+
+<div class="page">
+  <div class="cover">
+    <div class="cover-top">
+      <div class="brand">
+        <svg viewBox="0 0 66 30" fill="currentColor" aria-hidden="true">
+          <path d="M52.688 13.028c-.22 0-.437.008-.654.015a.3.3 0 0 0-.102.024.37.37 0 0 0-.236.255l-.93 3.249c-.401 1.397-.252 2.687.422 3.634.618.876 1.646 1.39 2.894 1.45l5.045.306a.45.45 0 0 1 .435.41.5.5 0 0 1-.025.223.64.64 0 0 1-.547.426l-5.242.306c-2.848.132-5.912 2.456-6.987 5.29l-.378 1a.28.28 0 0 0 .248.382h18.054a.48.48 0 0 0 .464-.35c.32-1.153.482-2.344.48-3.54 0-7.22-5.79-13.072-12.933-13.072M44.807 29.578l.334-1.175c.402-1.397.253-2.687-.42-3.634-.62-.876-1.647-1.39-2.896-1.45l-23.665-.306a.47.47 0 0 1-.374-.199.5.5 0 0 1-.052-.434.64.64 0 0 1 .552-.426l23.886-.306c2.836-.131 5.9-2.456 6.975-5.29l1.362-3.6a.9.9 0 0 0 .04-.477C48.997 5.259 42.789 0 35.367 0c-6.842 0-12.647 4.462-14.73 10.665a6.92 6.92 0 0 0-4.911-1.374c-3.28.33-5.92 3.002-6.246 6.318a7.2 7.2 0 0 0 .18 2.472C4.3 18.241 0 22.679 0 28.133q0 .74.106 1.453a.46.46 0 0 0 .457.402h43.704a.57.57 0 0 0 .54-.418"/>
+        </svg>
+        <span class="bt">Cloudflare <span>· Solutions Engineering</span></span>
+      </div>
+    </div>
+    <h1>The Workers Caff: cheat sheet</h1>
+    <div class="sub">Build with Cloudflare London · 29 September · 15:15 to 17:00 · prizes for the best builds</div>
+  </div>
+
+  <div class="section">
+    <div class="links">
+      <table>
+        <tbody>
+          <tr><td>Starter repo</td><td><a href="https://github.com/GoncaloLeitao/workers-caff-hackathon">github.com/GoncaloLeitao/workers-caff-hackathon</a></td></tr>
+          <tr><td>Your caff</td><td><code>https://workers-caff.&lt;you&gt;.workers.dev</code> (Wrangler prints it)</td></tr>
+          <tr><td>Its pages</td><td><code>/</code> dashboard · <code>/chat</code> Sid · <code>/mcp</code> MCP server · <code>/api/state</code> JSON</td></tr>
+          <tr><td>AI Playground</td><td><a href="https://playground.ai.cloudflare.com/models">playground.ai.cloudflare.com/models</a></td></tr>
+          <tr><td>Full guide</td><td><code>docs/guide.md</code> in the repo, with answers for every step</td></tr>
+        </tbody>
+      </table>
+      <div class="qr"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 33 33" shape-rendering="crispEdges"><path stroke="#521000" d="M0 0.5h7m3 0h1m3 0h1m1 0h6m1 0h1m2 0h7M0 1.5h1m5 0h1m2 0h2m4 0h2m1 0h1m1 0h1m1 0h1m3 0h1m5 0h1M0 2.5h1m1 0h3m1 0h1m1 0h2m1 0h1m2 0h2m2 0h4m4 0h1m1 0h3m1 0h1M0 3.5h1m1 0h3m1 0h1m1 0h4m5 0h1m1 0h1m4 0h1m1 0h1m1 0h3m1 0h1M0 4.5h1m1 0h3m1 0h1m1 0h1m5 0h8m1 0h1m2 0h1m1 0h3m1 0h1M0 5.5h1m5 0h1m1 0h2m1 0h1m2 0h1m2 0h1m6 0h1m1 0h1m5 0h1M0 6.5h7m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h7M8 7.5h1m1 0h1m1 0h1m3 0h1m1 0h1m1 0h2m1 0h1M0 8.5h1m1 0h5m2 0h1m1 0h4m2 0h1m8 0h5M0 9.5h2m5 0h1m1 0h1m2 0h2m2 0h5m2 0h1m2 0h2m1 0h4M0 10.5h9m1 0h1m1 0h6m2 0h3m1 0h1m3 0h1m1 0h2M0 11.5h2m1 0h1m1 0h1m1 0h1m4 0h2m1 0h2m2 0h4m1 0h1m1 0h1m1 0h5M1 12.5h2m2 0h5m1 0h2m1 0h4m2 0h1m1 0h4m2 0h2m1 0h2M2 13.5h4m1 0h4m2 0h1m1 0h1m2 0h3m2 0h1m1 0h2m2 0h4M6 14.5h4m1 0h1m1 0h6m1 0h1m1 0h1m2 0h2m2 0h1m1 0h1M0 15.5h3m4 0h1m1 0h1m2 0h1m1 0h2m5 0h1m2 0h3m2 0h2M1 16.5h2m3 0h1m1 0h1m1 0h1m2 0h1m1 0h1m1 0h1m4 0h1m1 0h2m1 0h2m3 0h1M0 17.5h2m1 0h1m1 0h1m1 0h2m3 0h3m1 0h3m1 0h1m2 0h1m2 0h2m1 0h2m1 0h1M0 18.5h1m4 0h4m2 0h3m1 0h1m1 0h1m2 0h2m2 0h1m2 0h2m1 0h1M0 19.5h2m2 0h1m2 0h3m5 0h2m1 0h4m3 0h8M0 20.5h2m2 0h1m1 0h1m5 0h2m4 0h2m2 0h1m1 0h1m2 0h3m1 0h2M0 21.5h6m1 0h1m2 0h2m1 0h1m1 0h2m1 0h4m1 0h1m2 0h1m2 0h1m2 0h1M0 22.5h1m3 0h1m1 0h4m1 0h2m1 0h1m3 0h1m1 0h1m4 0h1m2 0h2m1 0h1M0 23.5h1m1 0h1m2 0h1m2 0h4m4 0h1m2 0h1m1 0h12M0 24.5h1m1 0h3m1 0h2m1 0h1m3 0h1m3 0h1m1 0h1m2 0h1m1 0h6m1 0h1M8 25.5h1m1 0h3m1 0h6m1 0h1m1 0h2m3 0h1m1 0h1m1 0h1M0 26.5h7m2 0h4m2 0h3m2 0h2m1 0h2m1 0h1m1 0h1m1 0h2M0 27.5h1m5 0h1m1 0h1m2 0h2m3 0h3m1 0h5m3 0h4M0 28.5h1m1 0h3m1 0h1m1 0h2m1 0h1m1 0h2m1 0h1m2 0h1m2 0h1m1 0h6M0 29.5h1m1 0h3m1 0h1m1 0h3m1 0h1m1 0h2m1 0h4m2 0h3m2 0h1m1 0h3M0 30.5h1m1 0h3m1 0h1m1 0h1m1 0h1m4 0h2m3 0h1m1 0h1m3 0h2M0 31.5h1m5 0h1m3 0h4m1 0h1m2 0h2m1 0h2m2 0h2m1 0h3M0 32.5h7m1 0h2m1 0h2m1 0h2m1 0h1m4 0h4m1 0h1m3 0h1"/></svg><span>Scan for the<br>starter repo</span></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2><span class="num">1</span> Get going</h2>
+    <div class="two">
+<pre><span class="k">git clone</span> https://github.com/GoncaloLeitao/workers-caff-hackathon.git
+<span class="k">cd</span> workers-caff-hackathon
+<span class="k">npm install</span>
+<span class="k">npx wrangler login</span>
+<span class="k">npm run deploy</span></pre>
+      <div>
+        <p class="note">You need a free Cloudflare account, Node.js 22+ and Git. New accounts pick a <code>workers.dev</code> subdomain on the first deploy: any name works.</p>
+        <p class="note" style="margin-top:6px">No Node here? Use <strong>Deploy to Cloudflare</strong> in the README, then GitHub's web editor (press <code>.</code> on your repo). Each commit redeploys.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2><span class="num">2</span> The checkpoints</h2>
+    <div class="cp">
+      <div class="card">
+        <div class="head"><span class="n">1</span><span class="t">Open the caff</span><span class="by">by 15:35</span></div>
+        <ol>
+          <li>Deploy, then open your Worker's URL: that's your dashboard.</li>
+          <li>In AI Playground open <strong>Custom MCP → Add server</strong> and paste your <code>/mcp</code> URL.</li>
+          <li>Ask it: <em>what's on the menu at the caff?</em></li>
+        </ol>
+        <div class="m"><span><b>Missions:</b> Doors open · Hello, MCP · First tool call</span></div>
+      </div>
+      <div class="card">
+        <div class="head"><span class="n">2</span><span class="t">Build the MCP server</span><span class="by">by 16:05</span></div>
+        <ol>
+          <li>In <code>src/mcp.ts</code> finish TODO 1 to 4: <code>place_order</code>, <code>list_orders</code>, <code>update_order_status</code>, <code>restock_item</code>.</li>
+          <li>Deploy after each one, then <strong>Custom MCP → Tools → Refresh</strong>.</li>
+          <li>Try: <em>table 4 wants two bacon butties and a tea.</em></li>
+        </ol>
+        <div class="m"><span><b>Missions:</b> Order up · Service! · Stock take</span><span><code>skip:mcp</code></span></div>
+      </div>
+      <div class="card">
+        <div class="head"><span class="n">3</span><span class="t">Put Sid to work</span><span class="by">by 16:30</span></div>
+        <ol>
+          <li>In <code>src/agent.ts</code> uncomment <code>this.addMcpServer(...)</code> and <code>tools: this.mcp.getAITools()</code>.</li>
+          <li>Deploy and open <code>/chat</code>. The header should show your tools.</li>
+          <li>Give Sid an order and watch the dashboard.</li>
+        </ol>
+        <div class="m"><span><b>Missions:</b> Agent on shift · Takes an order · Full service</span><span><code>skip:agent</code></span></div>
+      </div>
+      <div class="card">
+        <div class="head"><span class="n">4</span><span class="t">Stretch</span><span class="by">till 17:00</span></div>
+        <ol>
+          <li>Refunds that a human approves on the dashboard.</li>
+          <li>A scheduled stock check with <code>this.scheduleEvery(...)</code>.</li>
+          <li>Memory for regulars, table hopping, a tool of your own, auth on <code>/mcp</code>. Or your own idea: <code>docs/ideas.md</code>.</li>
+        </ol>
+        <div class="m"><span><b>Bonus:</b> Off menu · Manager's say-so · Clockwork · Table hopping</span><span><code>skip:stretch</code></span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="foot">
+    <span>Cloudflare · Build with Cloudflare London · The Workers Caff cheat sheet</span>
+    <span>Page 1</span>
+  </div>
+</div>
+
+<div class="page">
+  <div class="section">
+    <h2><span class="num">3</span> The code you'll write</h2>
+<pre><span class="c">// src/mcp.ts: a tool is a name, a description for the model, an input schema and a handler</span>
+server.<span class="k">registerTool</span>(
+  "restock_item",
+  {
+    description: "Add portions to a menu item's stock, e.g. after a delivery. Use item ids from get_menu.",
+    inputSchema: z.object({
+      itemId: z.string().describe("Menu item id from get_menu"),
+      quantity: z.number().int().min(1).max(50).describe("How many portions to add")
+    })
+  },
+  async ({ itemId, quantity }) =&gt; asText(await caff.restockItem(itemId, quantity))
+);
+
+<span class="c">// What caff can do. Prices are in pence, tables are 1 to 12, orders only move forward.</span>
+caff.getMenu()                         caff.placeOrder({ table, items: [{ itemId, qty }], note })
+caff.listOrders({ status, table })     caff.updateOrderStatus(orderId, "cooking" | "ready" | "served" | "cancelled")
+caff.restockItem(itemId, quantity)     caff.requestRefund(orderId, reason)     caff.checkApproval(approvalId)
+
+<span class="c">// src/agent.ts, TODO 1: connect Sid to your MCP server</span>
+await this.<span class="k">addMcpServer</span>("caff", `${origin}/mcp`, {
+  transport: { type: "streamable-http", headers: { "x-caff-client": "agent", "x-caff-origin": origin } }
+});
+
+<span class="c">// TODO 2, inside generateText({ ... }): give the model every tool your MCP server offers</span>
+tools: this.mcp.<span class="k">getAITools</span>(),</pre>
+    <p class="note"><code>caff</code> throws readable errors (sold out, unknown item). The MCP SDK passes them to the model as tool errors, so you can skip the <code>try</code>/<code>catch</code>.</p>
+  </div>
+
+  <div class="section">
+    <h2><span class="num">4</span> Commands</h2>
+    <table>
+      <tbody>
+        <tr><td style="width:42%"><code>npm run dev</code></td><td>Local caff at <code>http://localhost:8787</code>. Test <code>/mcp</code> with MCP Inspector: AI Playground can't reach your laptop</td></tr>
+        <tr><td><code>npm run deploy</code></td><td>Put it live</td></tr>
+        <tr><td><code>npm run smoke -- &lt;url&gt; --write --agent</code></td><td>Check the API, your MCP tools and Sid in one go</td></tr>
+        <tr><td><code>npx wrangler tail</code></td><td>Live logs from your deployed Worker</td></tr>
+        <tr><td><code>npx @modelcontextprotocol/inspector</code></td><td>MCP Inspector: connect over Streamable HTTP and call tools by hand</td></tr>
+        <tr><td><code>npm run skip:mcp</code> · <code>skip:agent</code> · <code>skip:all</code> · <code>skip:stretch</code></td><td>Drop in a finished version. Yours is saved as <code>src/*.ts.bak</code></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="section">
+    <h2><span class="num">5</span> If it breaks</h2>
+    <table>
+      <tbody>
+        <tr><td style="width:42%">Sid says he isn't connected</td><td>Finish both TODOs in <code>src/agent.ts</code> and deploy again</td></tr>
+        <tr><td>New tools missing in AI Playground</td><td><strong>Custom MCP → Tools → Refresh</strong></td></tr>
+        <tr><td>"Couldn't use your MCP server"</td><td>Something in <code>src/mcp.ts</code> throws, often a tool registered twice. <code>npm run smoke -- &lt;url&gt;</code> shows the error</td></tr>
+        <tr><td>Error 1042</td><td>Keep <code>global_fetch_strictly_public</code> in <code>wrangler.jsonc</code>: Sid needs it to call your Worker's public URL</td></tr>
+        <tr><td>Free Workers AI allowance used up</td><td>Set <code>vars.MODEL</code> to <code>"@cf/zai-org/glm-4.7-flash"</code> in <code>wrangler.jsonc</code> and deploy</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="foot">
+    <span>Cloudflare · Build with Cloudflare London · The Workers Caff cheat sheet</span>
+    <span>Page 2</span>
+  </div>
+</div>
+
+</body>
+</html>

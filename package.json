@@ -41,6 +41,17 @@
     ],
     "categories": [
       "ai"
-    ]
+    ],
+    "bindings": {
+      "MODEL": {
+        "description": "The [Workers AI model](https://developers.cloudflare.com/workers-ai/models/) that Sid, your agent, thinks with. The default works on the free plan."
+      },
+      "CAFF": {
+        "description": "The caff's database: a Durable Object with SQLite that holds the menu, orders, stock and mission board."
+      },
+      "CaffAgent": {
+        "description": "Sid, your AI agent. Every chat session gets its own instance."
+      }
+    }
   }
 }
