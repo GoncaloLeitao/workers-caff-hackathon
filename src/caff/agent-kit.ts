@@ -63,9 +63,12 @@ const NOT_CONNECTED_REPLY =
   "I'm not connected to the caff's systems yet, so I can't see the menu, orders or stock. " +
   "Connect me to your MCP server in src/agent.ts (Checkpoint 3) and I'll get stuck in.";
 
+const WIRES_CROSSED = "Sorry, I got my wires crossed there. Could you ask me that again?";
+
 /**
  * Some open models occasionally leak their raw tool-call syntax as text
- * (for example gpt-oss's "<|channel|>" tokens). Strip it so the chat stays readable.
+ * (for example gpt-oss's "<|channel|>" tokens), or get stuck repeating one
+ * character ("!!!!!!…"). Tidy that up so the chat stays readable.
  */
 export function cleanReply(text: string, hadTools: boolean): string {
   const leaked = /<\|(start|channel|message|call|end|constrain)\|>/.test(text);
@@ -73,9 +76,10 @@ export function cleanReply(text: string, hadTools: boolean): string {
     .replace(/<\|start\|>[\s\S]*?(<\|call\|>|<\|end\|>|$)/g, "")
     .replace(/<\|[a-z_]+\|>/g, "")
     .trim();
+  if (/([^\s])\1{49,}/.test(cleaned)) return WIRES_CROSSED;
   if (cleaned) return cleaned;
   if (!hadTools) return NOT_CONNECTED_REPLY;
-  return leaked ? "Sorry, I got my wires crossed there. Could you ask me that again?" : "";
+  return leaked ? WIRES_CROSSED : "";
 }
 
 /** Token usage for the current chat turn, so the chat UI can show what each reply cost. */
@@ -246,7 +250,10 @@ export async function handleChatRequest(agent: ChatAgent, request: Request): Pro
     await agent.mcp.waitForConnections({ timeout: 5_000 });
     const { reply: text, tools } = await turnUsage.run(usage, () => agent.chat(message, url.origin));
     const reply =
-      cleanReply(text, mcpStatus(agent).toolCount > 0) || "(Sid went quiet. The model returned no text, so try asking again.)";
+      cleanReply(text, mcpStatus(agent).toolCount > 0) ||
+      (tools.length
+        ? `(Sid made ${tools.length} tool call${tools.length === 1 ? "" : "s"} but ran out of steps before replying. The chips below show what he did.)`
+        : "(Sid went quiet. The model returned no text, so try asking again.)");
     // Keep the saved conversation in step with what the user actually saw.
     const saved = agent.state?.messages ?? [];
     const last = saved[saved.length - 1];

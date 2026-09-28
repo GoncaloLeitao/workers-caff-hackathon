@@ -7,8 +7,8 @@ const SUGGESTIONS = [
   "What's on the menu?",
   "Table 4 wants two builder's teas and a bacon butty",
   "What's waiting in the kitchen?",
-  "The oldest order is ready. Mark it served",
-  "Anything running low? Top it up by 10",
+  "The order you just took is ready. Mark it served",
+  "What's running lowest? Top it up by 10",
   "Cancel the last order, they walked out"
 ];
 

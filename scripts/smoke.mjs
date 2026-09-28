@@ -5,11 +5,14 @@
 //   npm run smoke -- https://workers-caff.you.workers.dev
 //   npm run smoke -- <url> --write                  also exercises the write tools (orders show as "smoke")
 //   npm run smoke -- <url> --agent                  also asks your agent a question
+//   npm run smoke -- <url> --reset                  wipes the caff AND the mission board first (careful)
 //
+// The URL can be your Worker or its MCP server URL: a trailing /mcp is ignored.
 // Smoke-test traffic is labelled "smoke" and never ticks missions.
 
 const args = process.argv.slice(2);
-const base = (args.find((a) => !a.startsWith("--")) ?? "http://localhost:8787").replace(/\/+$/, "");
+// Accept the Worker URL or the MCP URL people copy from the dashboard.
+const base = (args.find((a) => !a.startsWith("--")) ?? "http://localhost:8787").replace(/\/+$/, "").replace(/\/mcp$/, "");
 const flags = new Set(args.filter((a) => a.startsWith("--")));
 
 const CHECKPOINT_2_TOOLS = ["place_order", "list_orders", "update_order_status", "restock_item"];
@@ -156,6 +159,7 @@ if (flags.has("--agent")) {
       ok(`reply in ${body.ms} ms using ${body.model}: "${body.reply.replace(/\s+/g, " ").slice(0, 120)}"`);
       info(`MCP tools the agent can see: ${body.mcp?.toolCount ?? 0}; tools it used: ${body.tools.map((t) => t.name).join(", ") || "none"}`);
       if (!body.mcp?.toolCount) info("the agent isn't connected to your MCP server yet (Checkpoint 3)");
+      if (/wires crossed/i.test(body.reply)) info("the model sometimes garbles a reply and Sid covers for it: run this again before you start debugging");
     } else bad(`agent error: ${body?.error ?? `HTTP ${res.status}`}`);
     await api(`/agents/caff-agent/${session}`, { method: "DELETE" });
   } catch (e) {

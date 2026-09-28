@@ -2,7 +2,7 @@
 
 By the end of this you'll have an MCP server that runs a caff and an AI agent, Sid, who uses it to take orders, chase the kitchen and keep the stock up. Everything runs on one Cloudflare Worker in your own account.
 
-There are four checkpoints. Rough timings for a 1 hour 45 minute session:
+There are four checkpoints. Rough timings for the two-hour session, 15:00 to 17:00:
 
 | Checkpoint | You'll have | Aim to finish by |
 |---|---|---|
@@ -249,8 +249,8 @@ Deploy, then reload `/chat`. The pill at the top should say **Connected to 1 MCP
 
 - *Table 6 wants a full English and two teas.*
 - *What's waiting in the kitchen?*
-- *The oldest order is ready. Mark it served.*
-- *Anything running low? Top it up by 10.*
+- *The order you just took is ready. Mark it served.*
+- *What's running lowest? Top it up by 10.*
 
 Under each reply you'll see the tools Sid called. Click one to see its input and output. On the dashboard his orders are labelled **AGENT**, and **Agent on shift**, **The agent takes an order** and **Full service** tick as he works.
 
@@ -264,7 +264,7 @@ Stuck? `npm run skip:agent` copies in a finished `src/agent.ts` (yours goes to `
 
 ## Checkpoint 4: stretch challenges
 
-Pick whatever looks fun. The bonus missions on the dashboard tick for four of them. `npm run skip:stretch` drops in one way to do the first five; reading `solutions/stretch/` is a good way to see how they work.
+Pick whatever looks fun. Four of them tick bonus missions on the dashboard. `npm run skip:stretch` drops in one way to do the first four, plus a `daily_report` tool as an example of a tool of your own. It doesn't tick **Off menu**: that one has to be yours. Reading `solutions/stretch/` is a good way to see how they work, but the builds that stand out at judging do something the reference doesn't.
 
 ### Manager's say-so (human in the loop)
 
@@ -277,7 +277,9 @@ Tell Sid *table 4 says their butty was cold, refund order 102*, approve it on th
 
 ### Clockwork (scheduled tasks)
 
-Agents can wake themselves up. In `chat()`, call `await this.scheduleEvery(120, "stockCheck")`, then write an `async stockCheck()` method on the class. Scheduled runs have no request, so save the Worker's origin in `this.state` during `chat()` and reconnect to the MCP server from there. Use `this.mcp.callTool({ serverId, name, arguments })` to call tools directly, and `reportScheduledTask("…")` from `./caff/agent-kit` to tick **Clockwork**. See [scheduling tasks](https://developers.cloudflare.com/agents/runtime/execution/schedule-tasks/).
+Agents can wake themselves up. `this.scheduleEvery(120, "stockCheck")` runs an `async stockCheck()` method on the class every two minutes. Scheduled runs have no request, so save the Worker's origin in `this.state` and reconnect to the MCP server from there. Use `this.mcp.callTool({ serverId, name, arguments })` to call tools directly, and `reportScheduledTask("…")` from `./caff/agent-kit` to tick **Clockwork**. See [scheduling tasks](https://developers.cloudflare.com/agents/runtime/execution/schedule-tasks/).
+
+One thing to think about: every chat session is its own agent, so scheduling from `chat()` starts a separate stock check for each conversation. Run it on one named instance instead (`getAgentByName` from `agents` gets you one), and decide when it should stop.
 
 ### Remember the regulars (memory and local tools)
 
@@ -299,11 +301,21 @@ From the next message, Sid can use their tools as well as yours: take orders for
 
 ### Off menu (a tool of your own)
 
-Invent a tool the caff hasn't got. A few ideas: `daily_report` (takings and best sellers), `todays_special`, `allergens`, `split_the_bill`, `kitchen_eta`. **Off menu** ticks the first time any client calls a tool the caff doesn't know about.
+Invent a tool the caff hasn't got. A few ideas: `todays_special`, `allergens`, `split_the_bill`, `kitchen_eta`, `busiest_table`. (`daily_report` is taken: the stretch reference already has one.) **Off menu** ticks the first time any client calls a tool the caff doesn't know about.
 
 ### Lock the door
 
 Anyone who knows your URL can use your MCP server. Add a bearer token check for `/mcp` in `src/index.ts`, store the token with `npx wrangler secret put MCP_TOKEN`, send it from Sid in the `addMcpServer` headers, and from AI Playground with **Custom headers** on your server. For the full version with logins, see [MCP authorization](https://developers.cloudflare.com/agents/model-context-protocol/protocol/authorization/).
+
+### Cloudflare OS (optional)
+
+The event has its own [Cloudflare OS](https://github.com/cloudflare/cloudflare-os) at [cfos.cfevents.dev](https://cfos.cfevents.dev). Sign in with the email you registered with and a one-time code. Workers AI models are free to use; a few OpenAI and Anthropic models work too, with a small daily budget each. If one of those stops answering, switch to a Workers AI model.
+
+Point it at your caff: open **Gatekeepers** from the sidebar (you may also be offered it the first time you sign in), choose **MCP Server**, then paste the `/mcp` URL from your caff's dashboard. Your caff has to be deployed, not running on localhost. Tools marked read-only, like `get_menu`, run straight away. Anything that changes the caff waits for you to approve it, the same human-in-the-loop idea as Manager's say-so above. Each link below opens Cloudflare OS with the prompt filled in, ready for you to edit and send:
+
+- [Use my caff's tools to show me the menu and any orders that are still open.](https://cfos.cfevents.dev/?prompt=Use%20my%20caff%27s%20tools%20to%20show%20me%20the%20menu%20and%20any%20orders%20that%20are%20still%20open.)
+- [Check my caff's stock and restock anything with fewer than 5 portions left. Ask me before changing anything.](https://cfos.cfevents.dev/?prompt=Check%20my%20caff%27s%20stock%20and%20restock%20anything%20with%20fewer%20than%205%20portions%20left.%20Ask%20me%20before%20changing%20anything.)
+- [Build me a small dashboard that shows my caff's active orders by table and refreshes every 30 seconds.](https://cfos.cfevents.dev/?prompt=Build%20me%20a%20small%20dashboard%20that%20shows%20my%20caff%27s%20active%20orders%20by%20table%20and%20refreshes%20every%2030%20seconds.)
 
 ### More ideas
 

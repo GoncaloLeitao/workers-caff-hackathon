@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "description": "Hackathon starter: a REST API, a live dashboard, an MCP server and an AI agent, all on one Cloudflare Worker.",
+  "license": "MIT",
   "scripts": {
     "dev": "wrangler dev",
     "deploy": "wrangler deploy",

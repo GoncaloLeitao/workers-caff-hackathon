@@ -90,7 +90,11 @@ The skip commands back your file up to `src/*.ts.bak` first, so you never lose w
 
 ## The model and the free plan
 
-Sid uses `@cf/openai/gpt-oss-120b`, set in `wrangler.jsonc` under `vars.MODEL`. It's quick and dependable at calling tools, and the free plan's 10,000 Neurons a day cover about 100 replies. If you run out, switch to `@cf/zai-org/glm-4.7-flash`: slower, but about a third of the cost. The chat page shows the tokens each reply used.
+Sid uses `@cf/openai/gpt-oss-120b`, set in `wrangler.jsonc` under `vars.MODEL`. It's quick and dependable at calling tools, and the free plan's 10,000 Neurons a day cover about 80 replies. If you run out, switch to `@cf/zai-org/glm-4.7-flash`: slower, but about a third of the cost. The chat page shows the tokens each reply used.
+
+## Using an AI coding assistant
+
+Go ahead. `AGENTS.md` (plus `CLAUDE.md`, a Cursor rule and Copilot instructions) asks assistants to coach you through the TODOs rather than paste the answers, so you still learn how it works. If you want the finished version, the skip commands are there for that.
 
 ## When something goes wrong
 

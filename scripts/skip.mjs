@@ -6,7 +6,8 @@
 //   npm run skip:all       both
 //   npm run skip:stretch   both, plus the stretch goals (refunds, memory, scheduling, table hopping)
 //
-// Your current file is backed up to src/<name>.ts.bak first, so nothing is lost.
+// Your current file is backed up first, as src/<name>.ts.bak (or .bak-2, .bak-3, ... if that
+// exists already), so skipping twice never overwrites your own work.
 
 import { copyFileSync, existsSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
@@ -33,15 +34,31 @@ if (!plan) {
   process.exit(1);
 }
 
+/** First free backup name: file.ts.bak, then file.ts.bak-2, file.ts.bak-3, ... */
+function backupPath(target) {
+  let path = `${target}.bak`;
+  for (let n = 2; existsSync(path); n++) path = `${target}.bak-${n}`;
+  return path;
+}
+
 for (const [from, to] of plan) {
   const source = join(root, from);
   const target = join(root, to);
-  if (existsSync(target)) copyFileSync(target, `${target}.bak`);
+  const current = existsSync(target) ? readFileSync(target, "utf8") : null;
   // Solutions import from "../src/..." (or "../../src/...") so they type-check where they live.
   // Inside src/ those imports become "./...".
   const code = readFileSync(source, "utf8").replace(/(["'])(?:\.\.\/)+src\//g, "$1./");
+  if (current === code) {
+    console.log(`• ${to} already has this finished version`);
+    continue;
+  }
+  let backup = null;
+  if (current !== null) {
+    backup = backupPath(target);
+    copyFileSync(target, backup);
+  }
   writeFileSync(target, code);
-  console.log(`✓ ${to} now has the finished version (your old file is in ${to}.bak)`);
+  console.log(`✓ ${to} now has the finished version${backup ? ` (your old file is in ${backup.slice(root.length + 1)})` : ""}`);
 }
 
 console.log(`

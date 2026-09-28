@@ -1,4 +1,4 @@
-import { Agent } from "agents";
+import { Agent, getAgentByName } from "agents";
 import { generateText, isStepCount, tool } from "ai";
 import { z } from "zod";
 import {
@@ -28,6 +28,8 @@ Rules:
 interface StretchState extends ChatState {
   /** This Worker's origin, saved so scheduled tasks can reconnect to /mcp. */
   origin?: string;
+  /** Kitchen instance only: when someone last chatted, so the stock check can stop itself. */
+  lastChatAt?: number;
   /** Regulars and their usual orders: agent memory that survives restarts. */
   regulars?: Record<string, string>;
 }
@@ -35,11 +37,21 @@ interface StretchState extends ChatState {
 const MCP_HEADERS = (origin: string) => ({ "x-caff-client": "agent", "x-caff-origin": origin });
 
 /**
+ * Every chat session is its own CaffAgent. The stock check runs on one extra instance with this
+ * name, so there is only ever one check however many conversations are open.
+ */
+const KITCHEN = "kitchen";
+
+/** The stock check stops itself once nobody has chatted for this long. */
+const IDLE_STOP_MS = 60 * 60 * 1000;
+
+/**
  * Stretch reference. On top of the finished agent:
  *   - memory: remembers regulars' usual orders in its own state
  *   - local tools: tools that run inside the agent, mixed with MCP tools
  *   - table hopping: connects to another table's MCP server on request
- *   - scheduling: a stock check every two minutes that restocks anything low
+ *   - scheduling: a stock check every two minutes that restocks anything low, run by one
+ *     "kitchen" instance and stopped after an hour without chat
  */
 export class CaffAgent extends Agent<Env, StretchState> {
   initialState: StretchState = { messages: [], regulars: {} };
@@ -52,8 +64,10 @@ export class CaffAgent extends Agent<Env, StretchState> {
     if (this.state.origin !== origin) this.setState({ ...this.state, origin });
     await this.connectToCaff(origin);
 
-    // Safe to call every time: the same callback + interval is only scheduled once.
-    await this.scheduleEvery(120, "stockCheck");
+    // Ask the kitchen instance to run the stock check. Safe to call every turn: scheduleEvery
+    // is idempotent, and it always lands on the same instance.
+    const kitchen = (await getAgentByName(this.env.CaffAgent, KITCHEN)) as unknown as DurableObjectStub<CaffAgent>;
+    await kitchen.startStockCheck(origin);
 
     const result = await generateText({
       model: chatModel(this.env),
@@ -110,8 +124,21 @@ export class CaffAgent extends Agent<Env, StretchState> {
     };
   }
 
+  /** Runs on the kitchen instance. Starts the two-minute stock check (once) and notes the time. */
+  async startStockCheck(origin: string) {
+    this.setState({ ...this.state, origin, lastChatAt: Date.now() });
+    await this.scheduleEvery(120, "stockCheck");
+  }
+
   /** Runs every two minutes once scheduled. Restocks anything running low. */
   async stockCheck() {
+    // Nobody has chatted for an hour: stop, so the check doesn't run forever after the event.
+    if (Date.now() - (this.state.lastChatAt ?? 0) > IDLE_STOP_MS) {
+      for (const schedule of await this.listSchedules()) {
+        if (schedule.callback === "stockCheck") await this.cancelSchedule(schedule.id);
+      }
+      return;
+    }
     const origin = this.state.origin;
     if (!origin) return;
     await this.connectToCaff(origin);

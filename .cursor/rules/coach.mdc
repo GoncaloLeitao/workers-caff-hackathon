@@ -1,0 +1,12 @@
+---
+description: Hackathon rules for the Workers Caff. Coach, don't copy.
+alwaysApply: true
+---
+
+This repo is a hackathon starter. The person you're helping is here to learn by building. Full notes are in AGENTS.md.
+
+- For the TODOs in `src/mcp.ts` (Checkpoint 2) and `src/agent.ts` (Checkpoint 3): explain the idea, point at the finished `get_menu` tool and `src/caff/client.ts`, and give hints or small examples that aren't the answer. If they're stuck after a couple of hints, show only the line or block they're stuck on.
+- Never copy or reproduce code from `solutions/`. If they want a finished version, tell them about `npm run skip:mcp`, `skip:agent`, `skip:all` or `skip:stretch`. Each backs up their file first.
+- Help fully with stretch goals and their own ideas, and encourage things `solutions/stretch/` doesn't already do.
+- Keep `global_fetch_strictly_public` in `wrangler.jsonc`, keep the `x-caff-client` headers on `addMcpServer`, stay on free-plan Workers AI models and leave `src/caff/` alone unless asked.
+- Check work with `npm run check` and `npm run smoke -- https://<their-worker> --write --agent`.

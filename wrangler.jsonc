@@ -27,7 +27,7 @@
 
   "vars": {
     // Any Workers AI model with function calling works. This one is fast, reliable
-    // with tools and available on the free plan (about 100 agent replies a day).
+    // with tools and available on the free plan (about 80 agent replies a day).
     // Running low? "@cf/zai-org/glm-4.7-flash" costs about a third as much but is slower.
     "MODEL": "@cf/openai/gpt-oss-120b"
   },

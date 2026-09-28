@@ -13,6 +13,7 @@ Printable version: [docs/cheatsheet.pdf](docs/cheatsheet.pdf)
 | Dashboard / chat / MCP / API | `/` · `/chat` · `/mcp` · `/api/state` |
 | AI Playground | https://playground.ai.cloudflare.com/models |
 | Step-by-step guide | [docs/guide.md](docs/guide.md) |
+| Cloudflare OS (optional) | https://cfos.cfevents.dev, sign in with the email you registered with |
 
 ## Get going
 
@@ -39,17 +40,15 @@ No Node 22 or no npm? Use the **Deploy to Cloudflare** button in the README, the
 ## The code you'll write
 
 ```ts
-// src/mcp.ts: an MCP tool
+// src/mcp.ts: every tool has the same shape. get_menu is done for you: copy its pattern.
 server.registerTool(
-  "restock_item",
+  "get_menu",                                       // the name the model calls
   {
-    description: "Add portions to a menu item's stock. Use item ids from get_menu.",
-    inputSchema: z.object({
-      itemId: z.string(),
-      quantity: z.number().int().min(1).max(50)
-    })
+    description: "List everything on the menu: ...", // how the model decides when to use it
+    inputSchema: z.object({}),                      // a zod schema: what the model must send
+    annotations: { readOnlyHint: true }             // a hint that it changes nothing
   },
-  async ({ itemId, quantity }) => asText(await caff.restockItem(itemId, quantity))
+  async () => asText(await caff.getMenu())          // do the work, send back JSON text
 );
 
 // src/agent.ts: connect Sid to your MCP server, then give the model its tools

@@ -3,4 +3,5 @@ node_modules/
 .dev.vars
 .env
 *.bak
+*.bak-*
 .DS_Store
