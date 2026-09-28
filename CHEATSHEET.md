@@ -1,6 +1,6 @@
 # The Workers Caff: cheat sheet
 
-Build with Cloudflare London · Tuesday 29 September 2026 · 15:15 to 17:00 · prizes for the best builds
+Build with Cloudflare London · Tuesday 29 September 2026 · 15:00 to 17:00 · prizes for the best builds at 17:00
 
 Printable version: [docs/cheatsheet.pdf](docs/cheatsheet.pdf)
 

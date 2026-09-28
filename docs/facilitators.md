@@ -24,14 +24,13 @@ For the people running the room. Attendees don't need this page, but nothing her
 
 | Time | What happens |
 |---|---|
-| 15:15 | Kick-off, five minutes: the two paths, the cheat sheet, how to get help, prizes |
-| 15:20 | Everyone deploys. Walk the room: sign-up and first deploy are where people get stuck |
+| 15:00 | Kick-off, five minutes: the two paths, the cheat sheet, how to get help, prizes |
+| 15:05 | Everyone deploys. Walk the room: sign-up and first deploy are where people get stuck |
 | 15:35 | Checkpoint 1 target. If several tables are stuck, demo AI Playground on the big screen |
 | 16:05 | Checkpoint 2 target. Suggest `npm run skip:mcp` to anyone still on the first tool |
 | 16:30 | Checkpoint 3 target. Suggest `npm run skip:all` to anyone behind, so everyone gets to chat to their agent |
-| 16:40 | Judges compare notes |
-| 16:50 | Prizes for the best builds |
-| 17:00 | Close |
+| 16:45 | Judges compare notes |
+| 17:00 | Discussion and prizes for the best builds |
 
 ## Kick-off, in about two minutes
 
