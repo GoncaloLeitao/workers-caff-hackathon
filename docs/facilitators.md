@@ -38,7 +38,7 @@ For the people running the room. Attendees don't need this page, but nothing her
 >
 > Everything you need is on the cheat sheet on your table. Use your own free Cloudflare account. Your dashboard has a mission board that ticks off as you go, which is how we'll find you. We'll be walking round the whole time, so wave if you're stuck.
 >
-> There are prizes for the best builds, and we'll hand them out at ten to five.
+> There are prizes for the best builds, and we’ll hand them out at five.
 
 ## Helping at a table
 
