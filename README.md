@@ -98,6 +98,7 @@ Go ahead. `AGENTS.md` (plus `CLAUDE.md`, a Cursor rule and Copilot instructions)
 
 ## When something goes wrong
 
+- **Deploy to Cloudflare says "Failed to get repository contents".** Try again in a private window, off any company VPN. If it still fails, skip the button: clone the repo and run `npm install`, `npx wrangler login` and `npm run deploy` (see [Get the caff running](#get-the-caff-running)).
 - **Sid says he isn't connected.** You haven't finished Checkpoint 3, or you haven't deployed since. See [the guide](docs/guide.md#checkpoint-3-put-sid-to-work).
 - **New tools don't show up in AI Playground.** Open **Custom MCP → Tools** and select **Refresh**.
 - **Error 1042** means the `global_fetch_strictly_public` flag is missing from `wrangler.jsonc`. Sid needs it to call your Worker's public URL.

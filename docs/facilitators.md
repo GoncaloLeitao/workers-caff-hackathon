@@ -43,6 +43,8 @@ For the people running the room. Attendees don't need this page, but nothing her
 
 ## Helping at a table
 
+If the Deploy to Cloudflare button fails for someone ("Failed to get repository contents", or no GitHub account), don't debug it: move them to the clone and `npm run deploy` route. It only needs Node.js 22+ and Git.
+
 Work through these in order:
 
 1. **Does the dashboard load** at `https://<their-worker>/`? If not, the deploy didn't happen. Check the output of `npm run deploy`, or the build log in the Cloudflare dashboard if they used the Deploy button.
