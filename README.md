@@ -100,7 +100,8 @@ Go ahead. `AGENTS.md` (plus `CLAUDE.md`, a Cursor rule and Copilot instructions)
 
 - **Deploy to Cloudflare says "Failed to get repository contents".** Try again in a private window, off any company VPN. If it still fails, skip the button: clone the repo and run `npm install`, `npx wrangler login` and `npm run deploy` (see [Get the caff running](#get-the-caff-running)).
 - **Sid says he isn't connected.** You haven't finished Checkpoint 3, or you haven't deployed since. See [the guide](docs/guide.md#checkpoint-3-put-sid-to-work).
-- **New tools don't show up in AI Playground.** Open **Custom MCP → Tools** and select **Refresh**.
+- **New tools don't show up.** Cloudflare OS checks for new tools every 5 minutes: wait, then start a new chat. In AI Playground, open **Custom MCP → Tools** and select **Refresh**.
+- **AI Playground says the demo is limited to 10 messages.** Start a new chat, or use the event's Cloudflare OS at [cfos.cfevents.dev](https://cfos.cfevents.dev) instead (see [the guide](docs/guide.md#3-connect-an-mcp-client)).
 - **Error 1042** means the `global_fetch_strictly_public` flag is missing from `wrangler.jsonc`. Sid needs it to call your Worker's public URL.
 - **"You've used today's free Workers AI allowance".** Switch model as described above.
 - **Anything else:** run `npm run smoke -- <your-url>` and `npx wrangler tail`, then check the [troubleshooting table](docs/guide.md#troubleshooting).

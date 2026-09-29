@@ -7,7 +7,7 @@ For the people running the room. Attendees don't need this page, but nothing her
 - [ ] Make the repo public (**Settings → General → Danger Zone → Change visibility**). The Deploy button only works on public repos.
 - [ ] Test the Deploy button once the repo is public, ideally with an account that has never used Workers.
 - [ ] Print the [cheat sheet](cheatsheet.pdf): one per person plus spares.
-- [ ] Check the venue Wi-Fi reaches `github.com`, `registry.npmjs.org`, `*.workers.dev` and `playground.ai.cloudflare.com`.
+- [ ] Check the venue Wi-Fi reaches `github.com`, `registry.npmjs.org`, `*.workers.dev`, `cfos.cfevents.dev` and `playground.ai.cloudflare.com`.
 - [ ] Deploy your own caff so you can demo each step. The organisers will send you the URL of a reference caff with every stretch goal done. Keep it off slides and out of public chat: anyone with the URL can change it.
 - [ ] On the morning, reset the reference caff with the `curl` command at the bottom of this page.
 - [ ] Agree the prize categories and who's judging.
@@ -17,8 +17,8 @@ For the people running the room. Attendees don't need this page, but nothing her
 | What | Where |
 |---|---|
 | Starter repo | https://github.com/GoncaloLeitao/workers-caff-hackathon |
-| AI Playground | https://playground.ai.cloudflare.com/models |
-| The event's Cloudflare OS (optional) | https://cfos.cfevents.dev, signed in with the attendee's registration email |
+| The event's Cloudflare OS (main MCP client) | https://cfos.cfevents.dev, signed in with the attendee's registration email |
+| AI Playground (backup) | https://playground.ai.cloudflare.com/models |
 
 ## Run of show
 
@@ -26,7 +26,7 @@ For the people running the room. Attendees don't need this page, but nothing her
 |---|---|
 | 15:00 | Kick-off, five minutes: the two paths, the cheat sheet, how to get help, prizes |
 | 15:05 | Everyone deploys. Walk the room: sign-up and first deploy are where people get stuck |
-| 15:35 | Checkpoint 1 target. If several tables are stuck, demo AI Playground on the big screen |
+| 15:35 | Checkpoint 1 target. If several tables are stuck, demo connecting Cloudflare OS on the big screen (**Gatekeepers → MCP Server**) |
 | 16:05 | Checkpoint 2 target. Suggest `npm run skip:mcp` to anyone still on the first tool |
 | 16:30 | Checkpoint 3 target. Suggest `npm run skip:all` to anyone behind, so everyone gets to chat to their agent |
 | 16:30 to 16:45 | Judges walk round. There's no submission form: judging is informal, at the tables |
@@ -63,8 +63,12 @@ Problems you're likely to see:
 | Sid chats but never uses tools | Checkpoint 3 not finished, or not deployed since. The chat header shows how many MCP tools Sid can see. |
 | "Couldn't use your MCP server" | Their `src/mcp.ts` fails to build a server. Usual suspects: a tool registered twice, or a syntax error. The smoke test shows the error. |
 | Error 1042 | They removed `global_fetch_strictly_public` from `wrangler.jsonc`. Sid needs it to call the Worker's own public URL. |
+| Can't sign in to Cloudflare OS | Only registered emails (and @cloudflare.com) can get a code. Walk-ins: send João the email to add to the Access policy. Meanwhile they can use AI Playground. |
+| Cloudflare OS doesn't change the caff | Writes wait for approval. They need to press **Approve** in the chat for each order, status change and restock. |
+| Tools missing in Cloudflare OS | It re-reads the tool list every 5 minutes. Wait, then start a new chat. |
 | Tools missing in AI Playground | **Custom MCP → Tools → Refresh** after each deploy. |
-| Free Workers AI allowance used up | Switch `vars.MODEL` to `@cf/zai-org/glm-4.7-flash` and redeploy. AI Playground doesn't use their allowance. |
+| AI Playground stops after 10 messages | A limit of the demo. Start a new chat, or move to Cloudflare OS. |
+| Free Workers AI allowance used up | Switch `vars.MODEL` to `@cf/zai-org/glm-4.7-flash` and redeploy. Cloudflare OS and AI Playground don't use their allowance. |
 | Missions don't tick for smoke tests | That's deliberate. Smoke traffic is labelled and ignored. |
 
 ## Judging
@@ -107,7 +111,7 @@ Enough detail to answer questions at the tables.
 | `x-caff-client: agent`, same origin | Their own agent |
 | `x-caff-client: agent`, different `x-caff-origin` | A visiting agent from another table |
 | `x-caff-client: smoke` | The smoke test (ignored) |
-| Anything else | An MCP client such as AI Playground |
+| Anything else | An MCP client such as Cloudflare OS or AI Playground |
 
 | Mission | Ticks when |
 |---|---|

@@ -7,7 +7,7 @@
     // The Agents SDK needs Node.js APIs.
     "nodejs_compat",
     // Lets your agent call your own /mcp endpoint (and other tables' Workers)
-    // over the public internet, the same way Claude or AI Playground would.
+    // over the public internet, the same way Cloudflare OS or AI Playground would.
     "global_fetch_strictly_public"
   ],
 

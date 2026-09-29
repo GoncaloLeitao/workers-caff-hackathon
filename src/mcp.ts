@@ -7,7 +7,7 @@ import type { Caff } from "./caff/client";
  * =============================
  *
  * MCP (Model Context Protocol) is how AI apps find and call tools. Anything
- * that speaks MCP (AI Playground, MCP Inspector, Claude, Cursor, your own
+ * that speaks MCP (Cloudflare OS, AI Playground, MCP Inspector, Claude, Cursor, your own
  * agent) can connect to https://<your-worker>/mcp, ask "what tools do you
  * have?" and call them.
  *
@@ -25,7 +25,7 @@ import type { Caff } from "./caff/client";
  *   TODO 3  update_order_status  ->  caff.updateOrderStatus(orderId, status)
  *   TODO 4  restock_item         ->  caff.restockItem(itemId, quantity)
  *
- * After each one: save, test it in MCP Inspector or AI Playground, and watch
+ * After each one: save, test it in Cloudflare OS, AI Playground or MCP Inspector, and watch
  * the dashboard. Stuck? Run `npm run skip:mcp` to drop in a finished version
  * (your file is backed up to src/mcp.ts.bak first).
  */

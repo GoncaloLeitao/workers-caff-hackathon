@@ -49,16 +49,27 @@ Press **Rush hour** to see a few walk-in orders arrive, and move them along with
 
 MCP (Model Context Protocol) is how AI apps find and use tools. A client connects to a server, asks which tools it has, and lets a model call them. Your caff already runs an MCP server at `https://<your-worker>/mcp` with one tool, `get_menu`.
 
-Copy the URL from the **Your MCP server** box on the dashboard, then connect a client. AI Playground is the quickest.
+Copy the URL from the **Your MCP server** box on the dashboard, then connect a client. Use the event's Cloudflare OS for the rest of the afternoon; AI Playground is the backup.
 
-**AI Playground**
+**Cloudflare OS** (use this one)
+
+The event has its own [Cloudflare OS](https://github.com/cloudflare/cloudflare-os) at [cfos.cfevents.dev](https://cfos.cfevents.dev). Workers AI models are free to use; a few OpenAI and Anthropic models work too, with a small budget each. If one of those stops answering, switch to a Workers AI model.
+
+1. Open [cfos.cfevents.dev](https://cfos.cfevents.dev) and sign in with the email you registered with and a one-time code.
+2. Open **Gatekeepers** from the sidebar (you may also be offered it the first time you sign in) and choose **MCP Server**.
+3. Paste your MCP server URL and select **Continue**.
+4. Start a chat and ask: *What's on the menu at the caff?*
+
+Tools marked read-only, like `get_menu`, run straight away. Anything that changes the caff waits for you to approve it in the chat, so from Checkpoint 2 on, expect to press **Approve** for each order, status change and restock.
+
+**AI Playground** (backup: no sign-in, but chats stop after 10 messages)
 
 1. Open [playground.ai.cloudflare.com/models](https://playground.ai.cloudflare.com/models).
 2. In the panel on the right, open **Custom MCP** and select **Add server**.
 3. Paste your MCP server URL and select **Add server**. After a few seconds it says **Ready**, and the **Tools** tab lists `get_menu`.
-4. Ask it: *What's on the menu at the caff?*
+4. Ask it: *What's on the menu at the caff?* When it says the demo is limited to 10 messages, start a new chat.
 
-The model calls `get_menu` and the dashboard ticks **Hello, MCP** and **First tool call**.
+Either way, the model calls `get_menu` and the dashboard ticks **Hello, MCP** and **First tool call**.
 
 **MCP Inspector** (a developer tool that shows the raw protocol)
 
@@ -110,10 +121,10 @@ server.registerTool(
 
 1. Uncomment the block and write the handler.
 2. Deploy with `npm run deploy` (or commit and push if you used the Deploy button).
-3. In AI Playground, open **Custom MCP → Tools** and select **Refresh**.
+3. Cloudflare OS picks up new tools within about 5 minutes; if one still isn't there, start a new chat. In AI Playground, open **Custom MCP → Tools** and select **Refresh**.
 4. Ask for something that needs the tool and watch the dashboard.
 
-Working locally? `npm run dev` serves everything at http://localhost:8787. AI Playground can't reach your laptop, so connect MCP Inspector to `http://localhost:8787/mcp` instead.
+Working locally? `npm run dev` serves everything at http://localhost:8787. Cloudflare OS and AI Playground can't reach your laptop, so connect MCP Inspector to `http://localhost:8787/mcp` instead.
 
 ### TODO 1: `place_order`
 
@@ -231,7 +242,7 @@ await this.addMcpServer("caff", `${origin}/mcp`, {
 });
 ```
 
-Sid connects to your `/mcp` over its public URL, the same way AI Playground did. The connection is saved in his storage, so calling this on every message is fine. The headers tell the dashboard that the calls come from your agent.
+Sid connects to your `/mcp` over its public URL, the same way Cloudflare OS did. The connection is saved in his storage, so calling this on every message is fine. The headers tell the dashboard that the calls come from your agent.
 
 ### TODO 2: hand the model your tools
 
@@ -305,13 +316,11 @@ Invent a tool the caff hasn't got. A few ideas: `todays_special`, `allergens`, `
 
 ### Lock the door
 
-Anyone who knows your URL can use your MCP server. Add a bearer token check for `/mcp` in `src/index.ts`, store the token with `npx wrangler secret put MCP_TOKEN`, send it from Sid in the `addMcpServer` headers, and from AI Playground with **Custom headers** on your server. For the full version with logins, see [MCP authorization](https://developers.cloudflare.com/agents/model-context-protocol/protocol/authorization/).
+Anyone who knows your URL can use your MCP server. Add a bearer token check for `/mcp` in `src/index.ts`, store the token with `npx wrangler secret put MCP_TOKEN`, send it from Sid in the `addMcpServer` headers, and from AI Playground with **Custom headers** on your server. Cloudflare OS only asks for a URL, so it can't send the token: test from AI Playground once the door is locked. For the full version with logins, see [MCP authorization](https://developers.cloudflare.com/agents/model-context-protocol/protocol/authorization/).
 
-### Cloudflare OS (optional)
+### More with Cloudflare OS
 
-The event has its own [Cloudflare OS](https://github.com/cloudflare/cloudflare-os) at [cfos.cfevents.dev](https://cfos.cfevents.dev). Sign in with the email you registered with and a one-time code. Workers AI models are free to use; a few OpenAI and Anthropic models work too, with a small daily budget each. If one of those stops answering, switch to a Workers AI model.
-
-Point it at your caff: open **Gatekeepers** from the sidebar (you may also be offered it the first time you sign in), choose **MCP Server**, then paste the `/mcp` URL from your caff's dashboard. Your caff has to be deployed, not running on localhost. Tools marked read-only, like `get_menu`, run straight away. Anything that changes the caff waits for you to approve it, the same human-in-the-loop idea as Manager's say-so above. Each link below opens Cloudflare OS with the prompt filled in, ready for you to edit and send:
+You connected Cloudflare OS to your caff in Checkpoint 1. It can do more than chat: it can write code against your tools, build small apps (gadgets) and run things on a schedule. Each link below opens Cloudflare OS with the prompt filled in, ready for you to edit and send:
 
 - [Use my caff's tools to show me the menu and any orders that are still open.](https://cfos.cfevents.dev/?prompt=Use%20my%20caff%27s%20tools%20to%20show%20me%20the%20menu%20and%20any%20orders%20that%20are%20still%20open.)
 - [Check my caff's stock and restock anything with fewer than 5 portions left. Ask me before changing anything.](https://cfos.cfevents.dev/?prompt=Check%20my%20caff%27s%20stock%20and%20restock%20anything%20with%20fewer%20than%205%20portions%20left.%20Ask%20me%20before%20changing%20anything.)
@@ -333,8 +342,11 @@ Point it at your caff: open **Gatekeepers** from the sidebar (you may also be of
 | Sid says he isn't connected to the caff | Finish both TODOs in `src/agent.ts` and deploy again. |
 | "Couldn't use your MCP server at …/mcp" | Your MCP server fails to start, often because of a duplicate tool name or an error at the top level of `src/mcp.ts`. Run `npm run smoke -- <your-worker>` and `npx wrangler tail`. |
 | Error 1042 | `global_fetch_strictly_public` is missing from `compatibility_flags` in `wrangler.jsonc`. Put it back and deploy. |
+| New tools don't show in Cloudflare OS | It checks for new tools every 5 minutes. Wait, then start a new chat. |
 | New tools don't show in AI Playground | **Custom MCP → Tools → Refresh**. |
-| AI Playground can't connect to localhost | It runs on the internet. Deploy, or use MCP Inspector for local testing. |
+| Can't sign in to Cloudflare OS | Use the email you registered with. If the code never arrives, ask a facilitator and use AI Playground meanwhile. |
+| AI Playground says the demo is limited to 10 messages | Start a new chat, or switch to Cloudflare OS, which has no such limit. |
+| Cloudflare OS or AI Playground can't connect to localhost | They run on the internet. Deploy, or use MCP Inspector for local testing. |
 | "You've used today's free Workers AI allowance" | Set `vars.MODEL` to `"@cf/zai-org/glm-4.7-flash"` in `wrangler.jsonc` and deploy. |
 | "That model needs the Workers Paid plan" | Set `vars.MODEL` back to `"@cf/openai/gpt-oss-120b"`. |
 | Wrangler asks for a workers.dev subdomain | New accounts need one. Pick any name. |

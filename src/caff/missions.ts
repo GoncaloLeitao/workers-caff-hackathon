@@ -36,7 +36,7 @@ export const MISSIONS: MissionDef[] = [
   {
     id: "mcp_connected",
     title: "Hello, MCP",
-    hint: "Connect AI Playground or MCP Inspector to your /mcp endpoint",
+    hint: "Connect Cloudflare OS, AI Playground or MCP Inspector to your /mcp endpoint",
     checkpoint: 1
   },
   {

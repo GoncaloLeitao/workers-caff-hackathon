@@ -11,9 +11,9 @@ Printable version: [docs/cheatsheet.pdf](docs/cheatsheet.pdf)
 | Starter repo | https://github.com/GoncaloLeitao/workers-caff-hackathon |
 | Your caff | `https://workers-caff.<your-subdomain>.workers.dev` (Wrangler prints it) |
 | Dashboard / chat / MCP / API | `/` · `/chat` · `/mcp` · `/api/state` |
-| AI Playground | https://playground.ai.cloudflare.com/models |
+| Cloudflare OS | https://cfos.cfevents.dev, sign in with the email you registered with |
+| AI Playground (backup) | https://playground.ai.cloudflare.com/models |
 | Step-by-step guide | [docs/guide.md](docs/guide.md) |
-| Cloudflare OS (optional) | https://cfos.cfevents.dev, sign in with the email you registered with |
 
 ## Get going
 
@@ -29,9 +29,9 @@ No Node 22 or no npm? Use the **Deploy to Cloudflare** button in the README, the
 
 ## The checkpoints
 
-**1. Open the caff** (aim for 15:35). Deploy and open your dashboard. In AI Playground, open **Custom MCP → Add server**, paste your `/mcp` URL and ask *what's on the menu?*
+**1. Open the caff** (aim for 15:35). Deploy and open your dashboard. In Cloudflare OS, open **Gatekeepers → MCP Server**, paste your `/mcp` URL, select **Continue** and ask *what's on the menu?* Approve anything that changes the caff. Backup: AI Playground, **Custom MCP → Add server** (10 messages per chat).
 
-**2. Build the MCP server** (aim for 16:05). In `src/mcp.ts`, finish TODO 1 to 4: `place_order`, `list_orders`, `update_order_status`, `restock_item`. After each deploy, **Custom MCP → Tools → Refresh**.
+**2. Build the MCP server** (aim for 16:05). In `src/mcp.ts`, finish TODO 1 to 4: `place_order`, `list_orders`, `update_order_status`, `restock_item`. After each deploy, Cloudflare OS sees new tools within 5 minutes (AI Playground: **Custom MCP → Tools → Refresh**).
 
 **3. Put Sid to work** (aim for 16:30). In `src/agent.ts`, uncomment `this.addMcpServer(...)` and `tools: this.mcp.getAITools()`. Deploy, open `/chat` and give Sid an order.
 
@@ -62,7 +62,7 @@ tools: this.mcp.getAITools(),
 
 | Command | What it does |
 |---|---|
-| `npm run dev` | Local caff at http://localhost:8787 (use MCP Inspector: AI Playground can't reach localhost) |
+| `npm run dev` | Local caff at http://localhost:8787 (use MCP Inspector: Cloudflare OS and AI Playground can't reach localhost) |
 | `npm run deploy` | Put it live |
 | `npm run smoke -- <url> --write --agent` | Check the API, your MCP tools and Sid |
 | `npx wrangler tail` | Live logs from your Worker |
@@ -74,6 +74,7 @@ tools: this.mcp.getAITools(),
 | What you see | Fix |
 |---|---|
 | Sid says he isn't connected | Finish Checkpoint 3 and deploy again |
+| New tools missing in Cloudflare OS | Wait 5 minutes, then start a new chat |
 | New tools missing in AI Playground | **Custom MCP → Tools → Refresh** |
 | "Couldn't use your MCP server" | `npm run smoke -- <url>` shows the error |
 | Error 1042 | Keep `global_fetch_strictly_public` in `wrangler.jsonc` |

@@ -38,7 +38,7 @@ export class CaffAgent extends Agent<Env, ChatState> {
   }
 
   async chat(message: string, origin: string): Promise<ChatReply> {
-    // 1. Connect to your own MCP server, the same way AI Playground did.
+    // 1. Connect to your own MCP server, the same way Cloudflare OS did.
     //    The headers tell the dashboard these calls come from your agent.
     //    (Safe to call every time: it reuses the existing connection.)
     await this.addMcpServer("caff", `${origin}/mcp`, {

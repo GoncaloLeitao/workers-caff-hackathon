@@ -7,7 +7,7 @@
 export type Source =
   | "dashboard" // someone clicked a button on the dashboard
   | "api" // a direct REST API call (curl, scripts)
-  | "mcp" // an MCP client such as AI Playground or MCP Inspector
+  | "mcp" // an MCP client such as Cloudflare OS, AI Playground or MCP Inspector
   | "agent" // your agent, calling your MCP server
   | "visitor" // another table's agent, calling your MCP server
   | "walk-in" // simulated customers from the "Rush hour" button
