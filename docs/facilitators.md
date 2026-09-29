@@ -88,11 +88,15 @@ Three or four prizes is plenty. Suggested categories: best agent, most creative,
 
 People will use Claude Code, Cursor, Copilot and friends, and that's fine. The repo has `AGENTS.md`, `CLAUDE.md`, `.cursor/rules/coach.mdc` and `.github/copilot-instructions.md`, which tell assistants to coach rather than paste answers from `solutions/`, and to point at the skip commands instead. Nothing stops someone who insists, and nothing needs to: the skip commands exist for exactly that.
 
-## Cloudflare OS (optional)
+## Cloudflare OS
 
-The event has a Cloudflare OS instance at `cfos.cfevents.dev`. Attendees sign in with the email they registered with and a one-time code. Workers AI models are free to use there. Only a few OpenAI and Anthropic models work, each with a small daily budget per person. If someone gets an error from one of those, or from a busy model, switching to a Workers AI model fixes it.
+The event has a Cloudflare OS instance at `cfos.cfevents.dev`, and it's the MCP client attendees should use all afternoon. AI Playground is the backup: it needs no sign-in, but it stops after 10 messages per chat.
 
-It's an optional stretch, not part of the guided path. The best use today: in Cloudflare OS, open **Gatekeepers** in the sidebar, choose **MCP Server** and paste the caff's deployed `/mcp` URL, then ask it to run the caff. A localhost URL won't work: the caff has to be deployed. Each connection is fixed to one URL, so to point at a different caff, add a new connection. Reads such as `get_menu` go straight through; anything that changes the caff waits for their approval.
+Attendees sign in with the email they registered with and a one-time code. Workers AI models are free to use there. Only a few OpenAI and Anthropic models work, each with a small daily budget per person. If someone gets an error from one of those, or from a busy model, switching to a Workers AI model fixes it.
+
+To connect a caff: open **Gatekeepers** in the sidebar, choose **MCP Server**, paste the caff's deployed `/mcp` URL and select **Continue**, then ask it to run the caff. A localhost URL won't work: the caff has to be deployed. Each connection is fixed to one URL, so to point at a different caff, add a new connection. Reads such as `get_menu` go straight through; anything that changes the caff waits for their approval. New tools show up within about 5 minutes of a deploy.
+
+The connect form only takes a URL, so once someone locks their `/mcp` with a bearer token (the "Lock the door" stretch), they'll need AI Playground's **Custom headers** to test it.
 
 ## How the starter works
 
